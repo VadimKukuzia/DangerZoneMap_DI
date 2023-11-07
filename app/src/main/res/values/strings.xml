@@ -1,0 +1,67 @@
+<resources>
+    <string name="app_name">DangerZoneMap_DI</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="title_activity_login" translatable="false">LoginActivity</string>
+    <string name="prompt_email" translatable="false">Email</string>
+    <string name="prompt_password" translatable="false">Password</string>
+    <string name="action_sign_in" translatable="false">Sign in or register</string>
+    <string name="action_sign_in_short" translatable="false">Sign in</string>
+    <string name="welcome" translatable="false">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
+    <string name="login_title" translatable="false">DangerousZone Map</string>
+    <string name="registration">Registration</string>
+    <string name="auth">Login</string>
+    <string name="google_auth">Login via Google</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="registration_title">Registration</string>
+    <string name="email_input_hint">Email</string>
+    <string name="username_input_hint">Username</string>
+    <string name="password_input_hint">Password</string>
+    <string name="registration_submit_button">Register</string>
+    <string name="authorization_submit_button">Authorize</string>
+    <string name="authorization_title">Authorization</string>
+
+    <string name="web_client_id" translatable="false">441732816721-f98c1ecfg3lajg9h3q5bmm3l479ova48.apps.googleusercontent.com</string>
+    <string name="main_map_title">Main map</string>
+    <string name="add_zone_map_title">Add zone map</string>
+    <string name="settings_title">Settings</string>
+    <string name="natural">Natural</string>
+    <string name="exit_button">Exit</string>
+    <string name="ecological">Ecological</string>
+    <string name="anthropogenic">Anthropogenic</string>
+    <string name="technogenic">Technogenic</string>
+    <string name="tv_select_zones_to_display">Select zones to display on map:</string>
+
+    <string name="logout_alert_dialog_title">Logout?</string>
+    <string name="logout_alert_dialog_message">You will be logged out. Are you sure?</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="location_button">Location search button</string>
+    <string name="choose_zone_type">Choose zone type</string>
+
+    <string name="zone_info_window_title">Danger Zone: %s</string>
+    <string name="zone_info_window_zone_type">Zone type: %s</string>
+    <string name="zone_info_window_zone_description">Description: %s</string>
+    <string name="permission_grant_title">Location permission</string>
+    <string name="permission_grant_text">You need to grant \"All the time\" background location permission to use app features.\nOK - Go to settings to grant</string>
+    <string name="location_enable_title">Enable Location</string>
+    <string name="location_enable_text">To use location features you need to enable location on your device</string>
+
+    <string name="notification_enter_title"><big>You entered potentially dangerous zone!</big></string>
+    <string name="notification_dwell_title"><big>You are dwelling in potentially dangerous zone!</big></string>
+    <string name="notification_exit_title"><big>You exited potentially dangerous zone</big></string>
+
+    <string name="notification_body"><b>Danger Zone:</b> %s\nClick on notification to see more</string>
+    <string name="add_new_zone_title">Adding new zone</string>
+    <string name="new_zone_name_hint">Enter short name for new zone</string>
+    <string name="radius_tv">Radius:</string>
+    <string name="enter_new_zone_extra_desc_hint">Enter extra description</string>
+    <string name="add_zone_submit_button">Inform about new zone</string>
+    <string name="new_zone_inform_sent">"New zone inform has been successfully sent "</string>
+    <string name="choose_point_on_map_toast">Choose point on map</string>
+    <string name="enter_new_zone_values">Enter new zone data</string>
+</resources>
