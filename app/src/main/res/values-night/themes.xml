@@ -15,7 +15,8 @@
         <!-- NavView -->
         <item name="navigationViewStyle">@style/Widget.DangerZoneMap_DI.NavigationViewNight</item>
         <!-- TextInput -->
-        <item name="textInputStyle">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox</item>
+        <item name="textInputStyle">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox
+        </item>
         <!-- TextView -->
     </style>
 </resources>

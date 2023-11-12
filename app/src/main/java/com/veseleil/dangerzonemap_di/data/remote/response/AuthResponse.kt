@@ -5,9 +5,9 @@ import com.veseleil.dangerzonemap_di.data.model.Tokens
 
 data class AuthResponse(
     @SerializedName("username")
-    private val userName: String,
+    val userName: String,
     @SerializedName("email")
-    private val email: String,
+    val email: String,
     @SerializedName("tokens")
-    private val tokens: Tokens
+    val tokens: Tokens
 )

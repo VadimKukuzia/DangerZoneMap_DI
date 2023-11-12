@@ -15,6 +15,9 @@
         <!-- NavView -->
         <item name="navigationViewStyle">@style/Widget.DangerZoneMap_DI.NavigationViewDay</item>
         <!-- TextInput -->
-        <item name="textInputStyle">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox</item>
+        <item name="textInputStyle">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox
+        </item>
     </style>
+
+    <style name="Theme.DangerZoneMap_DI" parent="Base.Theme.DangerZoneMap_DI" />
 </resources>

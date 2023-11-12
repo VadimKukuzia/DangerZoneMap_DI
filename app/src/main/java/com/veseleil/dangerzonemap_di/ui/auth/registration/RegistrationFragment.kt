@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.veseleil.dangerzonemap_di.R
@@ -38,7 +39,29 @@ class RegistrationFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.btnRegistrationSubmit.setOnClickListener {
+            beginRegistration()
+        }
 
+        registrationViewModel.registrationResponseLiveData.observe(viewLifecycleOwner) { registrationResponse ->
+            if (registrationResponse.isSuccessful) {
+                val direction = RegistrationFragmentDirections.actionRegistrationFragmentToLoginFragment(
+                    registrationResponse.body()!!.email)
+                findNavController().navigate(direction)
+            } else {
+                Toast.makeText(requireContext(), "Response Error", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun beginRegistration() {
+        val username = binding.usernameTextInputEditText.text.toString()
+        val email = binding.emailTextInputEditText.text.toString()
+        val password = binding.passwordTextInputEditText.text.toString()
+
+        if (username.isNotBlank() and email.isNotBlank() and password.isNotBlank()) {
+            registrationViewModel.register(username, email, password)
+        }
     }
 
     override fun onDestroyView() {
