@@ -2,8 +2,6 @@ package com.veseleil.dangerzonemap_di.ui.auth.startscreen
 
 import android.app.Activity
 import android.content.Intent
-import android.content.IntentSender
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -36,7 +34,7 @@ class StartScreenFragment : Fragment() {
 
     private val binding get() = _binding!!
 
-    private val startScreenViewModel: StartScreenViewModel by viewModels()
+    private val viewModel: StartScreenViewModel by viewModels()
 
     @Inject
     lateinit var sessionManager: SessionManager
@@ -78,7 +76,7 @@ class StartScreenFragment : Fragment() {
             startSignInGoogle(signInRequest)
         }
 
-        startScreenViewModel.authResponseLiveData.observe(viewLifecycleOwner) { authResponse ->
+        viewModel.authResponseLiveData.observe(viewLifecycleOwner) { authResponse ->
             if (authResponse.isSuccessful) {
                 sessionManager.saveAccessToken(authResponse.body()!!.tokens.accessToken)
                 startActivity(Intent(requireContext(), MainActivity::class.java))
@@ -117,7 +115,7 @@ class StartScreenFragment : Fragment() {
             val account: GoogleSignInAccount = completedTask.getResult(ApiException::class.java)
             Log.d("LOGTAG", account.idToken.toString())
 //            apiGoogleAuth(account.idToken.toString())// Signed in successfully, show authenticated UI.
-            startScreenViewModel.signInGoogle(account.idToken.toString())
+            viewModel.signInGoogle(account.idToken.toString())
 //            updateUI(account)
         } catch (e: ApiException) {
             // The ApiException status code indicates the detailed failure reason.

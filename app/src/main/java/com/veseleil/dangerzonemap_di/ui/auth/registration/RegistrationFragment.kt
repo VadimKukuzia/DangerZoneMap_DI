@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.veseleil.dangerzonemap_di.R
 import com.veseleil.dangerzonemap_di.databinding.FragmentRegistrationBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -24,7 +23,7 @@ class RegistrationFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
-    private val registrationViewModel: RegistrationViewModel by viewModels()
+    private val viewModel: RegistrationViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,7 +42,7 @@ class RegistrationFragment : Fragment() {
             beginRegistration()
         }
 
-        registrationViewModel.registrationResponseLiveData.observe(viewLifecycleOwner) { registrationResponse ->
+        viewModel.registrationResponseLiveData.observe(viewLifecycleOwner) { registrationResponse ->
             if (registrationResponse.isSuccessful) {
                 val direction = RegistrationFragmentDirections.actionRegistrationFragmentToLoginFragment(
                     registrationResponse.body()!!.email)
@@ -60,7 +59,7 @@ class RegistrationFragment : Fragment() {
         val password = binding.passwordTextInputEditText.text.toString()
 
         if (username.isNotBlank() and email.isNotBlank() and password.isNotBlank()) {
-            registrationViewModel.register(username, email, password)
+            viewModel.register(username, email, password)
         }
     }
 

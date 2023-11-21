@@ -2,15 +2,12 @@ package com.veseleil.dangerzonemap_di.ui.auth.login
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
-import com.veseleil.dangerzonemap_di.R
 import com.veseleil.dangerzonemap_di.databinding.FragmentLoginBinding
 import com.veseleil.dangerzonemap_di.ui.main.MainActivity
 import com.veseleil.dangerzonemap_di.utils.SessionManager
@@ -30,7 +27,7 @@ class LoginFragment : Fragment() {
     private val binding get() = _binding!!
 
     // Injecting
-    private val loginViewModel: LoginViewModel by viewModels()
+    private val viewModel: LoginViewModel by viewModels()
 
     @Inject
     lateinit var sessionManager: SessionManager
@@ -52,7 +49,7 @@ class LoginFragment : Fragment() {
             beginAuthorization()
         }
 
-        loginViewModel.authResponseLiveData.observe(viewLifecycleOwner) { authResponse ->
+        viewModel.authResponseLiveData.observe(viewLifecycleOwner) { authResponse ->
             if (authResponse.isSuccessful) {
                 sessionManager.saveAccessToken(authResponse.body()!!.tokens.accessToken)
                 startActivity(Intent(requireContext(), MainActivity::class.java))
@@ -68,7 +65,7 @@ class LoginFragment : Fragment() {
         val email = binding.emailTextInputEditText.text.toString()
         val password = binding.passwordTextInputEditText.text.toString()
         if (email.isNotBlank() and password.isNotBlank()) {
-            loginViewModel.authorize(email, password)
+            viewModel.authorize(email, password)
         }
     }
 

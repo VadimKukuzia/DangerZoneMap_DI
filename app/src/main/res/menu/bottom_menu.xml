@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/addZoneMapsFragment"
+        android:icon="@drawable/ic_baseline_add_alert_24"
+        android:title="@string/add_zone_map_title" />
+    <item
+        android:id="@+id/mainMapsFragment"
+        android:icon="@drawable/ic_baseline_map_24"
+        android:title="@string/main_map_title" />
+    <item
+        android:id="@+id/settingsFragment"
+        android:icon="@drawable/ic_baseline_settings_24"
+        android:title="@string/settings_title" />
+</menu>
