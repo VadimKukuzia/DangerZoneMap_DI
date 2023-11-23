@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.veseleil.dangerzonemap_di.R
@@ -25,7 +26,10 @@ class SettingsFragment : Fragment() {
     private val zoneTypesSet = mutableSetOf("NT", "TG", "AG", "EC")
 
     @Inject
-    private lateinit var sessionManager: SessionManager
+    lateinit var sessionManager: SessionManager
+
+    @Inject
+    lateinit var oneTapClient: SignInClient
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -37,15 +41,6 @@ class SettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // TODO MADE GOOGLE CLIENT AND OPTIONS HILT DEPENDENCY
-
-//        gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-//            .requestIdToken(getString(R.string.web_client_id))
-//            .requestEmail()
-//            .build()
-//
-//        gsc = GoogleSignIn.getClient(requireContext(), gso)
 
         sessionManager.putZoneTypes(zoneTypesSet)
 
@@ -93,7 +88,7 @@ class SettingsFragment : Fragment() {
 
     private fun logOut() {
         sessionManager.deleteAccessToken()
-        gsc.signOut()
+        oneTapClient.signOut()
         activity?.recreate()
     }
 

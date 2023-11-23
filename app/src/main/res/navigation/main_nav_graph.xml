@@ -3,7 +3,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_nav_graph"
-    >
+    app:startDestination="@id/mainMapFragment">
 
 
+    <fragment
+        android:id="@+id/addZoneMapFragment"
+        android:name="com.veseleil.dangerzonemap_di.ui.main.addzonemap.AddZoneMapFragment"
+        android:label="fragment_add_zone"
+        tools:layout="@layout/fragment_add_zone_map" />
+    <fragment
+        android:id="@+id/mainMapFragment"
+        android:name="com.veseleil.dangerzonemap_di.ui.main.mainmap.MainMapFragment"
+        android:label="fragment_main_map"
+        tools:layout="@layout/fragment_main_map" />
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.veseleil.dangerzonemap_di.ui.main.settings.SettingsFragment"
+        android:label="fragment_settings"
+        tools:layout="@layout/fragment_settings" />
 </navigation>

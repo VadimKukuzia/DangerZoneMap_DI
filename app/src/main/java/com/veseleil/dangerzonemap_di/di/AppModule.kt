@@ -3,6 +3,8 @@ package com.veseleil.dangerzonemap_di.di
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.identity.SignInClient
 import com.veseleil.dangerzonemap_di.R
 import com.veseleil.dangerzonemap_di.data.remote.ApiService
 import com.veseleil.dangerzonemap_di.data.repository.UserRepository
@@ -58,5 +60,12 @@ object AppModule {
     fun provideSharedPreferences(appContext: Application): SharedPreferences {
         return appContext.getSharedPreferences(appContext.getString(R.string.app_name), Context.MODE_PRIVATE)
     }
+
+    @Provides
+    @Singleton
+    fun provideGoogleSignInClient(appContext: Application): SignInClient {
+        return Identity.getSignInClient(appContext)
+    }
+
 
 }

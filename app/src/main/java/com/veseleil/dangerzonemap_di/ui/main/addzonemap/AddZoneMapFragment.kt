@@ -1,6 +1,5 @@
-package com.veseleil.dangerzonemap_di.ui.main.mainmap
+package com.veseleil.dangerzonemap_di.ui.main.addzonemap
 
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -13,21 +12,21 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.veseleil.dangerzonemap_di.R
-import com.veseleil.dangerzonemap_di.databinding.FragmentMainMapBinding
+import com.veseleil.dangerzonemap_di.databinding.FragmentAddZoneMapBinding
 import com.veseleil.dangerzonemap_di.utils.SessionManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainMapFragment : Fragment(), OnMapReadyCallback {
+class AddZoneMapFragment : Fragment(), OnMapReadyCallback {
 
-    private lateinit var _binding: FragmentMainMapBinding
+    private lateinit var _binding: FragmentAddZoneMapBinding
     private val binding get() = _binding
+
+    private lateinit var viewModel: AddZoneViewModel
 
     @Inject
     lateinit var sessionManager: SessionManager
-
-    private lateinit var viewModel: MainMapViewModel
 
     private lateinit var map: GoogleMap
 
@@ -35,7 +34,7 @@ class MainMapFragment : Fragment(), OnMapReadyCallback {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentMainMapBinding.inflate(inflater, container, false)
+        _binding = FragmentAddZoneMapBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -50,8 +49,8 @@ class MainMapFragment : Fragment(), OnMapReadyCallback {
         val sydney = LatLng(-34.0, 151.0)
         map.addMarker(
             MarkerOptions()
-            .position(sydney)
-            .title("Marker in Sydney"))
+                .position(sydney)
+                .title("Marker in Sydney"))
         map.moveCamera(CameraUpdateFactory.newLatLng(sydney))
     }
 

@@ -39,8 +39,8 @@ class StartScreenFragment : Fragment() {
     @Inject
     lateinit var sessionManager: SessionManager
 
-    private lateinit var oneTapClient: SignInClient
-    private lateinit var signInRequest: BeginSignInRequest
+    @Inject
+    lateinit var oneTapClient: SignInClient
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,16 +53,6 @@ class StartScreenFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        oneTapClient = Identity.getSignInClient(requireActivity())
-        signInRequest = BeginSignInRequest.builder()
-            .setGoogleIdTokenRequestOptions(BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
-                .setSupported(true)
-                .setServerClientId(getString(R.string.web_client_id))
-                .setFilterByAuthorizedAccounts(false)
-                .build())
-            .setAutoSelectEnabled(true)
-            .build()
-
         binding.btnLogin.setOnClickListener {
             findNavController().navigate(R.id.action_startScreenFragment_to_loginFragment)
         }
@@ -72,8 +62,7 @@ class StartScreenFragment : Fragment() {
         }
 
         binding.btnGoogleAuth.setOnClickListener {
-            Log.d("AAAAAAAAAAAAAAAAAAAAAAAA", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-            startSignInGoogle(signInRequest)
+            startSignInGoogle()
         }
 
         viewModel.authResponseLiveData.observe(viewLifecycleOwner) { authResponse ->
@@ -98,8 +87,17 @@ class StartScreenFragment : Fragment() {
             Log.d("LOGTAG", result.toString())
         }
     }
-    private fun startSignInGoogle(signInRequest: BeginSignInRequest) {
-        Log.d("LOGTAG", "StartSignInGoogle")
+    private fun startSignInGoogle() {
+
+        val signInRequest = BeginSignInRequest.builder()
+            .setGoogleIdTokenRequestOptions(BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                .setSupported(true)
+                .setServerClientId(getString(R.string.web_client_id))
+                .setFilterByAuthorizedAccounts(false)
+                .build())
+            .setAutoSelectEnabled(true)
+            .build()
+
         oneTapClient.beginSignIn(signInRequest)
             .addOnSuccessListener(requireActivity()) { result ->
                 val intentSenderRequest = IntentSenderRequest.Builder(result.pendingIntent.intentSender).build()

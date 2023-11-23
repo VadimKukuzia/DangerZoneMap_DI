@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
 
     @Inject
-    private lateinit var sessionManager: SessionManager
+    lateinit var sessionManager: SessionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,10 +35,10 @@ class MainActivity : AppCompatActivity() {
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        if (sessionManager.fetchAccessToken().isNullOrBlank()) {
-            startActivity(Intent(this, AuthActivity::class.java))
-            finish()
-        }
+//        if (sessionManager.fetchAccessToken().isNullOrBlank()) {
+//            startActivity(Intent(this, AuthActivity::class.java))
+//            finish()
+//        }
 
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.mainNavHostFragment) as NavHostFragment
