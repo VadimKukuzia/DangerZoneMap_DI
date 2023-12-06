@@ -65,7 +65,6 @@ class AddZoneMapFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var zoneTypes: Map<String, String>
 
-    private val PERMISSION_ID = 42
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var currentLocation: LatLng
 
