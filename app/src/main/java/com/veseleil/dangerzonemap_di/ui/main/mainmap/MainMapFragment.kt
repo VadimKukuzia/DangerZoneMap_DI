@@ -7,11 +7,11 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.location.LocationManager
 import android.net.Uri
 import android.os.Build
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
@@ -22,9 +22,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.Granularity
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -35,12 +39,17 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.veseleil.dangerzonemap_di.R
+import com.veseleil.dangerzonemap_di.data.model.Zone
 import com.veseleil.dangerzonemap_di.databinding.FragmentMainMapBinding
+import com.veseleil.dangerzonemap_di.geofence.GeofenceManager
 import com.veseleil.dangerzonemap_di.utils.SessionManager
+import com.veseleil.dangerzonemap_di.utils.ZoneInfoWindowAdapter
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -59,6 +68,8 @@ class MainMapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var currentLocation: LatLng
 
+    private lateinit var geofenceManager: GeofenceManager
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -74,10 +85,110 @@ class MainMapFragment : Fragment(), OnMapReadyCallback {
 
         fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(requireContext())
+
+        binding.locationFloatingActionButton.setOnClickListener {
+            getLastLocation()
+        }
+
+        geofenceManager = GeofenceManager(requireContext())
+
+        viewModel.getZonesToShow("Bearer " + sessionManager.fetchAccessToken().toString())
+
+        viewModel.zonesResponseLiveData.observe(viewLifecycleOwner) {
+            if (it.isSuccessful) {
+                val zones = it.body()!!
+                deregisterGeofences()
+
+                val requiredZoneTypes: MutableSet<String> =
+                    sessionManager.fetchZoneTypes() ?: mutableSetOf("NT", "TG", "AG", "EC")
+                val zonesToShowList =
+                    zones.filter { zone -> requiredZoneTypes.contains(zone.zoneType) }
+
+                if (this::map.isInitialized) {
+                    displayZonesToShow(zonesToShowList)
+                    addGeofences(zonesToShowList)
+                } else {
+                    parentFragmentManager.beginTransaction().detach(this).attach(this).commit()
+                }
+            } else {
+                Log.d("LOGTAG", "Not successful")
+            }
+        }
+
+    }
+
+    private fun deregisterGeofences() {
+        lifecycleScope.launch {
+            geofenceManager.deregisterGeofence()
+        }
+    }
+
+    private fun addGeofences(zonesToShowList: List<Zone>) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (isBackgroundPermissionGiven()) {
+                // Adding geofences
+                zonesToShowList.forEach {zone ->
+                    geofenceManager.addGeofence(
+                        zone.name,
+                        LatLng(zone.lat, zone.lon),
+                        zone.radius.toFloat()
+                    )
+                }
+                geofenceManager.registerGeofence()
+            } else {
+                locationPermissionRequest.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                    )
+                )
+            }
+        } else {
+            // Adding geofences
+            zonesToShowList.forEach {zone ->
+                geofenceManager.addGeofence(
+                    zone.name,
+                    LatLng(zone.lat, zone.lon),
+                    zone.radius.toFloat()
+                )
+            }
+            geofenceManager.registerGeofence()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun isBackgroundPermissionGiven(): Boolean {
+        return ContextCompat
+            .checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun displayZonesToShow(zonesToShowList: List<Zone>) {
+        zonesToShowList.forEach { zone ->
+            val zoneLatLng = LatLng(zone.lat, zone.lon)
+            map.addCircle(
+                CircleOptions()
+                    .center(zoneLatLng)
+                    .radius(zone.radius.toDouble())
+                    .strokeColor(Color.BLACK)
+                    .fillColor(Color.argb(80, 255, 0, 0))
+            )
+            val marker = map.addMarker(
+                MarkerOptions()
+                    .alpha(0f)
+                    .position(zoneLatLng)
+            )
+            marker?.tag = zone
+        }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         map.uiSettings.isMyLocationButtonEnabled = false
+
+        map.clear()
+        map.uiSettings.isMapToolbarEnabled = false
+        map.setInfoWindowAdapter(ZoneInfoWindowAdapter(requireContext()))
 
         // 1 - Show user his location
         getLastLocation()
