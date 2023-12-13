@@ -35,10 +35,10 @@ class MainActivity : AppCompatActivity() {
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-//        if (sessionManager.fetchAccessToken().isNullOrBlank()) {
-//            startActivity(Intent(this, AuthActivity::class.java))
-//            finish()
-//        }
+        if (sessionManager.fetchAccessToken().isNullOrBlank()) {
+            startActivity(Intent(this, AuthActivity::class.java))
+            finish()
+        }
 
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.mainNavHostFragment) as NavHostFragment

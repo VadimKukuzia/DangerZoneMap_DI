@@ -18,6 +18,8 @@ import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.veseleil.dangerzonemap_di.R
@@ -42,6 +44,9 @@ class StartScreenFragment : Fragment() {
     @Inject
     lateinit var oneTapClient: SignInClient
 
+    private lateinit var gso: GoogleSignInOptions
+    private lateinit var gsc: GoogleSignInClient
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -52,6 +57,13 @@ class StartScreenFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.web_client_id))
+            .requestEmail()
+            .build()
+
+        gsc = GoogleSignIn.getClient(requireContext(), gso)
 
         binding.btnLogin.setOnClickListener {
             findNavController().navigate(R.id.action_startScreenFragment_to_loginFragment)
@@ -76,36 +88,39 @@ class StartScreenFragment : Fragment() {
         }
     }
 
-    private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val data: Intent? = result.data
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+    private var resultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data: Intent? = result.data
+                val task = GoogleSignIn.getSignedInAccountFromIntent(data)
 
-            handleSignInResult(task)
-        } else {
-            Log.d("LOGTAG", "RESULT CODE: ${result.resultCode}")
-            Log.d("LOGTAG", result.toString())
+                handleSignInResult(task)
+            } else {
+                Log.d("LOGTAG", "RESULT CODE: ${result.resultCode}")
+                Log.d("LOGTAG", result.toString())
+            }
         }
-    }
     private fun startSignInGoogle() {
 
-        val signInRequest = BeginSignInRequest.builder()
-            .setGoogleIdTokenRequestOptions(BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
-                .setSupported(true)
-                .setServerClientId(getString(R.string.web_client_id))
-                .setFilterByAuthorizedAccounts(false)
-                .build())
-            .setAutoSelectEnabled(true)
-            .build()
-
-        oneTapClient.beginSignIn(signInRequest)
-            .addOnSuccessListener(requireActivity()) { result ->
-                val intentSenderRequest = IntentSenderRequest.Builder(result.pendingIntent.intentSender).build()
-                resultLauncher.launch(intentSenderRequest)
-            }
-            .addOnFailureListener(requireActivity()) {
-                Log.d("LOGTAG", it.localizedMessage!!)
-            }
+        val signInIntent = gsc.signInIntent
+        resultLauncher.launch(signInIntent)
+//        val signInRequest = BeginSignInRequest.builder()
+//            .setGoogleIdTokenRequestOptions(BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+//                .setSupported(true)
+//                .setServerClientId(getString(R.string.web_client_id))
+//                .setFilterByAuthorizedAccounts(false)
+//                .build())
+//            .setAutoSelectEnabled(true)
+//            .build()
+//
+//        oneTapClient.beginSignIn(signInRequest)
+//            .addOnSuccessListener(requireActivity()) { result ->
+//                val intentSenderRequest = IntentSenderRequest.Builder(result.pendingIntent.intentSender).build()
+//                resultLauncher.launch(intentSenderRequest)
+//            }
+//            .addOnFailureListener(requireActivity()) {
+//                Log.d("LOGTAG", "oneTapClientFailure:" + it.localizedMessage!!)
+//            }
     }
 
     private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {

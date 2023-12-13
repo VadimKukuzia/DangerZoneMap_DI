@@ -25,7 +25,7 @@
     <string name="authorization_submit_button">Authorize</string>
     <string name="authorization_title">Authorization</string>
 
-    <string name="web_client_id" translatable="false">https://348578225122-jvgr2u97frf0g5eh9h4sh6724bim6ba7.apps.googleusercontent.com</string>
+    <string name="web_client_id" translatable="false">348578225122-9bmnqvjrs9jchvdbmbjugkubbmkbe73r.apps.googleusercontent.com</string>
     <string name="main_map_title">Main map</string>
     <string name="add_zone_map_title">Add zone map</string>
     <string name="settings_title">Settings</string>
