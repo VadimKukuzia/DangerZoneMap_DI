@@ -97,18 +97,23 @@ class MainMapFragment : Fragment(), OnMapReadyCallback {
         viewModel.zonesResponseLiveData.observe(viewLifecycleOwner) {
             if (it.isSuccessful) {
                 val zones = it.body()!!
-                deregisterGeofences()
+                Log.d("LOGTAG", zones.isEmpty().toString())
+                if (zones.isNotEmpty()) {
+                    deregisterGeofences()
 
-                val requiredZoneTypes: MutableSet<String> =
-                    sessionManager.fetchZoneTypes() ?: mutableSetOf("NT", "TG", "AG", "EC")
-                val zonesToShowList =
-                    zones.filter { zone -> requiredZoneTypes.contains(zone.zoneType) }
+                    val requiredZoneTypes: MutableSet<String> =
+                        sessionManager.fetchZoneTypes() ?: mutableSetOf("NT", "TG", "AG", "EC")
+                    val zonesToShowList =
+                        zones.filter { zone -> requiredZoneTypes.contains(zone.zoneType) }
 
-                if (this::map.isInitialized) {
-                    displayZonesToShow(zonesToShowList)
-                    addGeofences(zonesToShowList)
+                    if (this::map.isInitialized) {
+                        displayZonesToShow(zonesToShowList)
+                        addGeofences(zonesToShowList)
+                    } else {
+                        parentFragmentManager.beginTransaction().detach(this).attach(this).commit()
+                    }
                 } else {
-                    parentFragmentManager.beginTransaction().detach(this).attach(this).commit()
+                    Toast.makeText(requireContext(), "No zones to show", Toast.LENGTH_SHORT).show()
                 }
             } else {
                 Log.d("LOGTAG", "Not successful")
@@ -184,6 +189,7 @@ class MainMapFragment : Fragment(), OnMapReadyCallback {
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
+        map = googleMap
         map.uiSettings.isMyLocationButtonEnabled = false
 
         map.clear()
@@ -195,6 +201,7 @@ class MainMapFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun getLastLocation() {
+        Log.d("LOGTAG", "user permission" + checkUserPermission().toString())
         if (checkUserPermission()) {
             if (isLocationEnabled()) {
                 fusedLocationProviderClient.lastLocation.addOnCompleteListener(requireActivity()) { task ->
@@ -218,15 +225,12 @@ class MainMapFragment : Fragment(), OnMapReadyCallback {
                 getLastLocation()
             }
         } else {
+            Log.d("LOGTAG", "build version")
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                locationPermissionRequest.launch(
-                    arrayOf(
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION,
-                        Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                    )
-                )
+                Log.d("LOGTAG", "build version > Q")
+                getPermissionsWithSettings()
             } else {
+                Log.d("LOGTAG", "build version < Q")
                 locationPermissionRequest.launch(
                     arrayOf(
                         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -311,32 +315,39 @@ class MainMapFragment : Fragment(), OnMapReadyCallback {
                 getLastLocation()
                 Log.d("LOGTAG", "Coarse location granted")
             }
+            permissions.getOrDefault(Manifest.permission.ACCESS_BACKGROUND_LOCATION, false) -> {
+                map.isMyLocationEnabled = true
+                getLastLocation()
+            }
             else -> {
                 // No location access granted.
-                AlertDialog.Builder(requireContext()).apply {
-                    setTitle(R.string.permission_grant_title)
-                    setMessage(R.string.permission_grant_text)
-                    setPositiveButton(R.string.ok,
-                        DialogInterface.OnClickListener { _, _ ->
-                            val intent = Intent(
-                                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                                Uri.fromParts("package", requireActivity().packageName, null)
-                            )
-                            startActivity(intent)
-                        }
-                    )
-                    setNegativeButton(R.string.cancel,
-                        DialogInterface.OnClickListener { dialogInterface, _ ->
-                            dialogInterface.cancel()
-                        }
-                    )
-                    create()
-                    show()
-                }
-                Log.d("LOGTAG", "No location granted")
+                getPermissionsWithSettings()
             }
         }
     }
 
+    private fun getPermissionsWithSettings() {
+        AlertDialog.Builder(requireContext()).apply {
+            setTitle(R.string.permission_grant_title)
+            setMessage(R.string.permission_grant_text)
+            setPositiveButton(R.string.ok,
+                DialogInterface.OnClickListener { _, _ ->
+                    val intent = Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.fromParts("package", requireActivity().packageName, null)
+                    )
+                    startActivity(intent)
+                }
+            )
+            setNegativeButton(R.string.cancel,
+                DialogInterface.OnClickListener { dialogInterface, _ ->
+                    dialogInterface.cancel()
+                }
+            )
+            create()
+            show()
+        }
+        Log.d("LOGTAG", "No location granted")
+    }
 
 }
