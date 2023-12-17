@@ -13,6 +13,10 @@ import com.veseleil.dangerzonemap_di.utils.NotificationHelper
 
 class GeofenceBroadcastReceiver: BroadcastReceiver() {
 
+    init {
+        Log.d("LOGTAG", "GeofenceBroadcastReceiver inited")
+    }
+
     private val TAG = "GeofenceBroadcastReceiver"
     override fun onReceive(context: Context, intent: Intent) {
         val geofencingEvent = GeofencingEvent.fromIntent(intent)
@@ -30,25 +34,36 @@ class GeofenceBroadcastReceiver: BroadcastReceiver() {
             val notificationHelper = NotificationHelper(context)
 
             // Test that the reported transition was of interest.
-            if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-
-                // Get the geofences that were triggered. A single event can trigger
-                // multiple geofences.
-                val triggeringGeofences = geofencingEvent.triggeringGeofences
-
-                // Send notification and log the transition details.
-                // TODO
-                notificationHelper.sendHighPriorityNotification(
-                    context.getString(R.string.notification_enter_title),
-                    context.getString(R.string.notification_body,
-                        triggeringGeofences?.get(0)?.requestId ?: "triggeredGeofenceErrorRequest"
-                    ),
-                    MainActivity::class.java
-                )
-
-            } else {
-                // Log the error.
-                Log.e(TAG, "Error")
+            Log.d("LOGTAG", "$geofenceTransition $geofencingEvent")
+            when (geofencingEvent.geofenceTransition) {
+                Geofence.GEOFENCE_TRANSITION_ENTER -> {
+//                Toast.makeText(context, "GEOFENCE_TRANSITION_ENTER", Toast.LENGTH_SHORT).show()
+                    notificationHelper.sendHighPriorityNotification(
+                        context.getString(R.string.notification_enter_title),
+                        context.getString(R.string.notification_body,
+                            geofencingEvent.triggeringGeofences?.get(0)?.requestId ?: "request id error"
+                        ),
+                        MainActivity::class.java
+                    )
+                }
+//            Geofence.GEOFENCE_TRANSITION_DWELL -> {
+////                Toast.makeText(context, "GEOFENCE_TRANSITION_DWELL", Toast.LENGTH_SHORT).show()
+//                notificationHelper.sendHighPriorityNotification(
+//                    context.getString(R.string.notification_dwell_title),
+//                    context.getString(R.string.notification_body,
+//                        geofencingEvent.triggeringGeofences[0].requestId),
+//                    MainActivity::class.java
+//                )
+//            }
+//            Geofence.GEOFENCE_TRANSITION_EXIT -> {
+////                Toast.makeText(context, "GEOFENCE_TRANSITION_EXIT", Toast.LENGTH_SHORT).show()
+//                notificationHelper.sendHighPriorityNotification(
+//                    context.getString(R.string.notification_exit_title),
+//                    context.getString(R.string.notification_body,
+//                        geofencingEvent.triggeringGeofences[0].requestId),
+//                    MainActivity::class.java
+//                )
+//            }
             }
         }
     }

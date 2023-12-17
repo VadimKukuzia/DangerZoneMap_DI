@@ -26,8 +26,8 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.Granularity
 import com.google.android.gms.location.LocationCallback
@@ -49,7 +49,6 @@ import com.veseleil.dangerzonemap_di.geofence.GeofenceManager
 import com.veseleil.dangerzonemap_di.utils.SessionManager
 import com.veseleil.dangerzonemap_di.utils.ZoneInfoWindowAdapter
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -69,6 +68,7 @@ class MainMapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var currentLocation: LatLng
 
     private lateinit var geofenceManager: GeofenceManager
+    private lateinit var geofencingClient: GeofencingClient
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -91,6 +91,7 @@ class MainMapFragment : Fragment(), OnMapReadyCallback {
         }
 
         geofenceManager = GeofenceManager(requireContext())
+        geofencingClient = LocationServices.getGeofencingClient(requireContext())
 
         viewModel.getZonesToShow("Bearer " + sessionManager.fetchAccessToken().toString())
 
@@ -99,7 +100,7 @@ class MainMapFragment : Fragment(), OnMapReadyCallback {
                 val zones = it.body()!!
                 Log.d("LOGTAG", zones.isEmpty().toString())
                 if (zones.isNotEmpty()) {
-                    deregisterGeofences()
+                    deregisterGeofences(zones.map { zone -> zone.name })
 
                     val requiredZoneTypes: MutableSet<String> =
                         sessionManager.fetchZoneTypes() ?: mutableSetOf("NT", "TG", "AG", "EC")
@@ -122,24 +123,17 @@ class MainMapFragment : Fragment(), OnMapReadyCallback {
 
     }
 
-    private fun deregisterGeofences() {
-        lifecycleScope.launch {
-            geofenceManager.deregisterGeofence()
-        }
+    private fun deregisterGeofences(zones: List<String>) {
+        geofencingClient.removeGeofences(zones)
     }
 
     private fun addGeofences(zonesToShowList: List<Zone>) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             if (isBackgroundPermissionGiven()) {
                 // Adding geofences
-                zonesToShowList.forEach {zone ->
-                    geofenceManager.addGeofence(
-                        zone.name,
-                        LatLng(zone.lat, zone.lon),
-                        zone.radius.toFloat()
-                    )
+                zonesToShowList.forEach {
+                    addGeofence(it)
                 }
-                geofenceManager.registerGeofence()
             } else {
                 locationPermissionRequest.launch(
                     arrayOf(
@@ -149,15 +143,34 @@ class MainMapFragment : Fragment(), OnMapReadyCallback {
             }
         } else {
             // Adding geofences
-            zonesToShowList.forEach {zone ->
-                geofenceManager.addGeofence(
-                    zone.name,
-                    LatLng(zone.lat, zone.lon),
-                    zone.radius.toFloat()
-                )
+            zonesToShowList.forEach {
+                addGeofence(it)
             }
-            geofenceManager.registerGeofence()
         }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun addGeofence(zone: Zone) {
+
+        val geofenceLatLng = LatLng(zone.lat, zone.lon)
+        val geofence = geofenceManager.getGeofence(
+            zone.name,
+            geofenceLatLng,
+            zone.radius.toDouble(),
+            Geofence.GEOFENCE_TRANSITION_ENTER or
+                    Geofence.GEOFENCE_TRANSITION_DWELL or
+                    Geofence.GEOFENCE_TRANSITION_EXIT
+        )
+
+        val geofencingRequest = geofenceManager.getGeofencingRequest(geofence)
+        val pendingIntent = geofenceManager.getPendingIntent()
+
+        geofencingClient.addGeofences(geofencingRequest, pendingIntent)
+            .addOnSuccessListener {
+                Log.d("Tag", "OnSuccess: Geofence added")
+            }.addOnFailureListener {
+                Log.d("Tag", geofenceManager.getErrorString(it))
+            }
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -210,7 +223,6 @@ class MainMapFragment : Fragment(), OnMapReadyCallback {
                         requestNewLocationData()
                     } else {
                         currentLocation = LatLng(location.latitude, location.longitude)
-                        map.clear()
                         map.animateCamera((CameraUpdateFactory.newLatLngZoom(currentLocation, 12F)))
                     }
                 }
@@ -222,7 +234,6 @@ class MainMapFragment : Fragment(), OnMapReadyCallback {
                 ).show()
                 val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                 startActivity(intent)
-                getLastLocation()
             }
         } else {
             Log.d("LOGTAG", "build version")
